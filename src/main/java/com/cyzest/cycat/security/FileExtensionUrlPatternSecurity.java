@@ -4,6 +4,6 @@ public class FileExtensionUrlPatternSecurity implements UrlPatternSecurity {
 
     @Override
     public boolean validate(String url) {
-        return !url.matches("(?i)\\.exe&");
+        return !url.matches("(?i)^(.)+\\.exe$");
     }
 }

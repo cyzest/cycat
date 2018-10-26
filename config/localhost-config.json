@@ -1,0 +1,19 @@
+{
+  "port":8080,
+  "thread":10,
+  "hosts":[
+    {
+      "host":"localhost",
+      "root":"html",
+      "index":"index.html",
+      "errorPage":{
+        "403":"403.html",
+        "404":"404.html",
+        "500":"500.html"
+      },
+      "servletMapping":{
+        "/test":"com.cyzest.cycat.service.CurrentTimeServlet"
+      }
+    }
+  ]
+}

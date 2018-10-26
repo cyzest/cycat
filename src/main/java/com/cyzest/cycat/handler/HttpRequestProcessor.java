@@ -1,7 +1,6 @@
 package com.cyzest.cycat.handler;
 
 import com.cyzest.cycat.config.HostInfo;
-import com.cyzest.cycat.exception.HttpSatusException;
 import com.cyzest.cycat.http.*;
 import com.cyzest.cycat.security.DirectoryUrlPatternSecurity;
 import com.cyzest.cycat.security.FileExtensionUrlPatternSecurity;
@@ -17,15 +16,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class HttpRequestProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpRequestProcessor.class);
 
-    private final Map<String, HostInfo> hostInfoMap = new HashMap<>();
+    private static final String CRLF = "\r\n";
 
-    private final Map<String, UrlPatternSecurityChecker> hostUrlPatternSecurityCheckerMap = new HashMap<>();
+    private final Map<String, HostProcessInfo> hostProcessInfoMap = new HashMap<>();
 
     public HttpRequestProcessor(List<HostInfo> hostInfos) throws IOException {
 
@@ -35,19 +33,16 @@ public class HttpRequestProcessor {
 
         for (HostInfo hostInfo : hostInfos) {
 
-            this.hostInfoMap.put(hostInfo.getHost(), hostInfo);
+            HostProcessInfo hostProcessInfo = new HostProcessInfo(hostInfo);
 
             UrlPatternSecurityChecker urlPatternSecurityChecker = new UrlPatternSecurityChecker();
 
             urlPatternSecurityChecker.addUrlPatternSecurity(new FileExtensionUrlPatternSecurity());
+            urlPatternSecurityChecker.addUrlPatternSecurity(new DirectoryUrlPatternSecurity(hostInfo.getRoot()));
 
-            String documentRoot = hostInfo.getRoot();
+            hostProcessInfo.setUrlPatternSecurityChecker(urlPatternSecurityChecker);
 
-            if (documentRoot != null && !documentRoot.isEmpty()) {
-                urlPatternSecurityChecker.addUrlPatternSecurity(new DirectoryUrlPatternSecurity(documentRoot));
-            }
-
-            this.hostUrlPatternSecurityCheckerMap.put(hostInfo.getHost(), urlPatternSecurityChecker);
+            this.hostProcessInfoMap.put(hostInfo.getHost(), hostProcessInfo);
         }
     }
 
@@ -55,30 +50,51 @@ public class HttpRequestProcessor {
 
         try (ByteArrayOutputStream responseOutputStream = new ByteArrayOutputStream()) {
 
+            // HTTP 리퀘스트 & 리스폰스 정보 생성
+
             HttpRequest httpRequest = HttpRequestFactory.createHttpRequest(inputStream);
 
             logger.debug("Method: {}", httpRequest.getMethod());
             logger.debug("URL: {}", httpRequest.getUrl());
             logger.debug("HttpVersion: {}", httpRequest.getHttpVersion());
-            logger.debug("Host: {}", httpRequest.getHost());
+
+            if (logger.isDebugEnabled()) {
+                httpRequest.getHeaderMap().forEach((key, value) -> logger.debug(key + ": " + value));
+                httpRequest.getParameterMap().forEach((key, value) -> logger.debug(key + "=" + value));
+            }
 
             HttpResponse httpResponse = HttpResponseFactory.createHttpResponse(responseOutputStream);
 
-            // 호스트 별 분기 처리
+            // HTTP 리퀘스트 요청 처리
 
-            String host = httpRequest.getHost();
+            processRequest(httpRequest, httpResponse, outputStream, responseOutputStream);
 
-            HostInfo hostInfo = hostInfoMap.get(host);
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
+    }
 
-            if (hostInfo == null) {
-                hostInfo = hostInfoMap.get("localhost");
-            }
+    private void processRequest(
+            HttpRequest httpRequest, HttpResponse httpResponse,
+            OutputStream outputStream, ByteArrayOutputStream responseOutputStream) {
 
-            // URL 맵핑 서블릿 처리
+        // 호스트 별 처리 정보 조회
+
+        String host = httpRequest.getHost();
+
+        HostProcessInfo hostProcessInfo = hostProcessInfoMap.get(host);
+
+        if (hostProcessInfo == null) {
+            hostProcessInfo = hostProcessInfoMap.get("localhost");
+        }
+
+        try {
+
+            // 서블릿 맵핑 처리
 
             String url = httpRequest.getUrl();
 
-            Map<String, String> servletMapping = hostInfo.getServletMapping();
+            Map<String, String> servletMapping = hostProcessInfo.getServletMapping();
 
             if (servletMapping != null && servletMapping.containsKey(url)) {
 
@@ -86,87 +102,146 @@ public class HttpRequestProcessor {
 
                 SimpleServlet servlet = (SimpleServlet) Class.forName(servletClassName).newInstance();
 
-                httpResponse.setContentType("application/text; charset=utf-8");
+                httpResponse.setHttpStatus(HttpStatus.OK);
+                httpResponse.setContentType(ContentType.TEXT_HTML);
 
                 servlet.service(httpRequest, httpResponse);
 
+                String body = new String(responseOutputStream.toByteArray(), StandardCharsets.UTF_8);
+
+                sendResponse(
+                        outputStream, httpRequest.getHttpVersion(),
+                        httpResponse.getHttpStatus(), httpResponse.getContentType(), body);
+
             } else {
 
-                // 서블릿이 없으면 URL 맵핑 페이지 처리
+                // 서블릿 맵핑이 없으면 URL 맵핑 페이지 처리
 
-                String docRoot = hostInfo.getRoot();
-
-                if (docRoot != null && !docRoot.isEmpty()) {
-
-                    File htmlFile;
-
-                    if (url.matches("\\.(\\w)+&")) {
-                        htmlFile = new File(docRoot + url);
-                    } else {
-                        String index = hostInfo.getIndex();
-                        htmlFile = new File(docRoot + index);
-                    }
-
-                    if (!htmlFile.isFile()) {
-                        throw new HttpSatusException(404);
-                    }
-
-                    // URL 보안 규칙 처리
-
-                    if (!hostUrlPatternSecurityCheckerMap.get(host).validate(url)) {
-                        throw new HttpSatusException(403);
-                    }
-
-                    httpResponse.setContentType(URLConnection.getFileNameMap().getContentTypeFor(url));
-
-                    String body = new String(Files.readAllBytes(htmlFile.toPath()), StandardCharsets.UTF_8);
-
-                    httpResponse.getWriter().write(body);
-                    httpResponse.getWriter().flush();
-
-                } else {
-
-                    // Document Root 설정이 없으면 디폴트 인덱스 페이지 처리
-
-                    if ("/".equals(url)) {
-
-                        try (InputStream in = this.getClass().getClassLoader().getResourceAsStream("html/index.html")) {
-
-                            try (BufferedReader buffer = new BufferedReader(new InputStreamReader(in))) {
-                                httpResponse.getWriter().write(buffer.lines().collect(Collectors.joining("\n")));
-                                httpResponse.getWriter().flush();
-                            }
-                        }
-
-                    } else {
-                        throw new HttpSatusException(404);
-                    }
-                }
+                processUrlPageResponse(outputStream, httpRequest, httpResponse, hostProcessInfo);
             }
 
-            // 리스폰스 세팅
+        } catch (Exception ex) {
 
-            Writer writer = new OutputStreamWriter(new BufferedOutputStream(outputStream));
+            // 오류 페이지 처리
 
-            sendHeader(writer, httpRequest.getHttpVersion() + " 200 OK",
-                    "application/text; charset=utf-8", responseOutputStream.size());
+            HttpStatus httpStatus;
 
-            writer.write(responseOutputStream.toString(StandardCharsets.UTF_8.name()));
-            writer.flush();
+            if (ex instanceof HttpStatusException) {
+                HttpStatusException httpStatusException = (HttpStatusException) ex;
+                httpStatus = httpStatusException.getStatus();
+            } else {
+                logger.error("Internal Server Error", ex);
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+            }
 
-        } catch (Throwable ex) {
-            logger.error("Http Request Processing Error", ex);
+            processErrorPageResponse(httpStatus, outputStream, httpRequest, httpResponse, hostProcessInfo);
         }
     }
 
-    private void sendHeader(Writer out, String responseCode, String contentType, int length) throws IOException {
-        out.write(responseCode + "\r\n");
-        Date now = new Date();
-        out.write("Date: " + now + "\r\n");
-        out.write("Server: Cycat 2.0\r\n");
-        out.write("Content-length: " + length + "\r\n");
-        out.write("Content-type: " + contentType + "\r\n\r\n");
-        out.flush();
+    private void processUrlPageResponse(
+            OutputStream outputStream,
+            HttpRequest httpRequest, HttpResponse httpResponse, HostProcessInfo hostProcessInfo) throws Exception {
+
+        String body;
+
+        File htmlFile;
+
+        String url = httpRequest.getUrl();
+
+        String documentRoot = hostProcessInfo.getRoot();
+
+        String fileExtensionRegx = "^(.)+\\.(\\w)+$";
+
+        if (url.matches(fileExtensionRegx)) {
+            htmlFile = new File(documentRoot + url);
+        } else {
+            String index = hostProcessInfo.getIndex();
+            htmlFile = new File(documentRoot + "/" + url + "/" + index);
+        }
+
+        if (!htmlFile.isFile()) {
+            throw new HttpStatusException(HttpStatus.NOT_FOUND);
+        }
+
+        if (!hostProcessInfo.getUrlPatternSecurityChecker().validate(url)) {
+            throw new HttpStatusException(HttpStatus.FORBIDDEN);
+        }
+
+        httpResponse.setContentType(URLConnection.getFileNameMap().getContentTypeFor(htmlFile.getName()));
+
+        body = new String(Files.readAllBytes(htmlFile.toPath()), StandardCharsets.UTF_8);
+
+        httpResponse.setHttpStatus(HttpStatus.OK);
+
+        sendResponse(
+                outputStream, httpRequest.getHttpVersion(),
+                httpResponse.getHttpStatus(), httpResponse.getContentType(), body);
+
+    }
+
+    private void processErrorPageResponse(
+            HttpStatus httpStatus, OutputStream outputStream,
+            HttpRequest httpRequest, HttpResponse httpResponse, HostProcessInfo hostProcessInfo) {
+
+        String body = null;
+
+        httpResponse.setHttpStatus(httpStatus);
+
+        Map<String, String> errorPageMap = hostProcessInfo.getErrorPage();
+
+        if (errorPageMap != null && !errorPageMap.isEmpty()) {
+
+            String errorPage = errorPageMap.get(String.valueOf(httpStatus.getCode()));
+
+            if (errorPage != null && !errorPage.isEmpty()) {
+
+                File htmlFile = new File(hostProcessInfo.getRoot() + "/" + errorPage);
+
+                if (htmlFile.isFile() && htmlFile.canRead()) {
+                    try {
+                        httpResponse.setContentType(URLConnection.getFileNameMap().getContentTypeFor(errorPage));
+                        body = new String(Files.readAllBytes(htmlFile.toPath()), StandardCharsets.UTF_8);
+                    } catch (Exception ex) {
+                        logger.warn("htmlFile readAllBytes io exception", ex);
+                    }
+                }
+            }
+        }
+
+        sendResponse(
+                outputStream, httpRequest.getHttpVersion(),
+                httpResponse.getHttpStatus(), httpResponse.getContentType(), body);
+
+    }
+
+    private void sendResponse(
+            OutputStream outputStream,
+            String httpVersion, HttpStatus httpStatus, String contentType, String body) {
+
+        try {
+
+            Writer writer = new OutputStreamWriter(new BufferedOutputStream(outputStream));
+
+            writer.write(httpVersion + " " + httpStatus.getCode() + " " + httpStatus.getMessage() + CRLF);
+
+            writer.write("Date: " + new Date() + CRLF);
+            writer.write("Server: Cycat 2.0" + CRLF);
+
+            if (contentType != null) {
+                writer.write("Content-type: " + contentType + CRLF);
+            }
+
+            writer.write("Content-length: " + (body != null ? body.length() : 0) + CRLF + CRLF);
+
+            if (body != null) {
+                writer.write(body);
+            }
+
+            writer.flush();
+
+        } catch (Exception ex) {
+            logger.warn("writer io exception", ex);
+        }
     }
 
 }

@@ -1,17 +1,14 @@
 package com.cyzest.cycat.http;
 
-import java.io.BufferedOutputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.io.*;
 
 public class HttpResponseFactory {
 
-    public static HttpResponse createHttpResponse(OutputStream responseOutputStream) throws Exception {
+    public static HttpResponse createHttpResponse(OutputStream responseOutputStream) {
 
-        OutputStream raw = new BufferedOutputStream(responseOutputStream);
+        OutputStream outputStream = new DataOutputStream(responseOutputStream);
 
-        Writer writer = new OutputStreamWriter(raw);
+        Writer writer = new OutputStreamWriter(outputStream);
 
         DefaultHttpResponse defaultHttpResponse = new DefaultHttpResponse();
 
@@ -22,9 +19,21 @@ public class HttpResponseFactory {
 
     private static class DefaultHttpResponse implements HttpResponse {
 
+        private HttpStatus httpStatus;
+
         private String contentType;
 
         private Writer writer;
+
+        @Override
+        public HttpStatus getHttpStatus() {
+            return httpStatus;
+        }
+
+        @Override
+        public void setHttpStatus(HttpStatus httpStatus) {
+            this.httpStatus = httpStatus;
+        }
 
         @Override
         public String getContentType() {

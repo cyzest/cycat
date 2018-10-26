@@ -8,19 +8,19 @@ public class ServerConfig {
     private Integer thread;
     private List<HostInfo> hosts;
 
-    public int getPort() {
+    public Integer getPort() {
         return port;
     }
 
-    public void setPort(int port) {
+    public void setPort(Integer port) {
         this.port = port;
     }
 
-    public int getThread() {
+    public Integer getThread() {
         return thread;
     }
 
-    public void setThread(int thread) {
+    public void setThread(Integer thread) {
         this.thread = thread;
     }
 

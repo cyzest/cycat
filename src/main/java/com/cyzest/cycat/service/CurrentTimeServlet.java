@@ -7,6 +7,7 @@ import com.cyzest.cycat.http.SimpleServlet;
 import java.io.IOException;
 import java.io.Writer;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 public class CurrentTimeServlet implements SimpleServlet {
 
@@ -15,8 +16,9 @@ public class CurrentTimeServlet implements SimpleServlet {
 
         Writer writer = httpResponse.getWriter();
 
-        writer.write(LocalTime.now().toString());
+        writer.write("현재시각 : " + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
 
         writer.flush();
     }
+
 }

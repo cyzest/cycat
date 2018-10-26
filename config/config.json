@@ -3,7 +3,7 @@
   "thread":10,
   "hosts":[
     {
-      "host":"localhost",
+      "host":"cyzest.com",
       "root":"html",
       "index":"index.html",
       "errorPage":{
@@ -12,7 +12,8 @@
         "500":"500.html"
       },
       "servletMapping":{
-        "/":"com.cyzest.cyzest."
+        "/time":"com.cyzest.cycat.service.CurrentTimeServlet",
+        "/test":"com.cyzest.cycat.service.CurrentTimeServlet"
       }
     }
   ]

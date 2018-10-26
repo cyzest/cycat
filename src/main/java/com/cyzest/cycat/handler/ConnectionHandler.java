@@ -33,17 +33,21 @@ public class ConnectionHandler implements Runnable {
         logger.debug("Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
-            httpRequestProcessor.process(in, out);
+
+            if (in.available() > 0) {
+                httpRequestProcessor.process(in, out);
+            }
+
         } catch (IOException ex) {
             logger.warn("connection io exception", ex);
         } finally {
             try {
+                logger.debug("Connected Close IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
                 connection.close();
             } catch (IOException ex) {
                 logger.warn("connection close exception", ex);
             }
         }
-
 
     }
 

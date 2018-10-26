@@ -4,7 +4,7 @@
 	<appender name="rolling" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<encoder>
 			<charset>UTF-8</charset>
-			<pattern>[%d] %-5p [%c] %m%n</pattern>
+			<pattern>[%d] [%thread] %-5p [%c] %m%n</pattern>
 		</encoder>
 		<File>./logs/app.log</File>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -15,7 +15,7 @@
 	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
 			<charset>UTF-8</charset>
-			<pattern>[%d] %-5p [%c] %m%n</pattern>
+			<pattern>[%d] [%thread] %-5p [%c] %m%n</pattern>
 		</encoder>
 	</appender>
 

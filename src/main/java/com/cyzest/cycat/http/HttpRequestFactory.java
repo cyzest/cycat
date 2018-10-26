@@ -1,5 +1,8 @@
 package com.cyzest.cycat.http;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -10,6 +13,8 @@ import java.util.StringTokenizer;
 
 public class HttpRequestFactory {
 
+    private static final Logger logger = LoggerFactory.getLogger(HttpRequestFactory.class);
+
     public static HttpRequest createHttpRequest(InputStream requestInputStream) throws Exception {
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(requestInputStream, StandardCharsets.UTF_8));
@@ -18,10 +23,16 @@ public class HttpRequestFactory {
 
         String requestLine = reader.readLine();
 
+        if (requestLine == null) {
+            throw new HttpFormatException("Invalid HTTP Request");
+        }
+
+        logger.debug("requestLine : {}", requestLine);
+
         StringTokenizer requestToken = new StringTokenizer(requestLine);
 
         if (requestToken.countTokens() != 3) {
-            throw new IllegalAccessException("Invalid HTTP Request Line");
+            throw new HttpFormatException("Invalid HTTP Request Line");
         }
 
         String method = requestToken.nextToken();
@@ -39,7 +50,7 @@ public class HttpRequestFactory {
             int idx = headerLine.indexOf(":");
 
             if (idx == -1) {
-                throw new IllegalAccessException("Invalid HTTP Header Line");
+                throw new HttpFormatException("Invalid HTTP Header Line");
             }
 
             headerMap.put(headerLine.substring(0, idx), headerLine.substring(idx + 2));
@@ -53,9 +64,20 @@ public class HttpRequestFactory {
 
         int idx = url.indexOf("?");
 
-        if (idx != -1) {
+        if (idx != -1 && !url.matches("\\?&")) {
 
             String queryString = url.substring(idx + 1);
+
+            String[] queries = queryString.split("&");
+
+            for (String query : queries) {
+
+                String[] param = query.split("=");
+
+                if (param.length == 2) {
+                    parameterMap.put(param[0], param[1]);
+                }
+            }
 
             url = url.substring(0, idx);
         }
@@ -95,7 +117,11 @@ public class HttpRequestFactory {
 
         @Override
         public String getParameter(String name) {
-            return null;
+            String parameter = null;
+            if (parameterMap != null) {
+                parameter = parameterMap.get(name);
+            }
+            return parameter;
         }
 
         @Override

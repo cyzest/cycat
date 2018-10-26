@@ -13,7 +13,7 @@ public class DirectoryUrlPatternSecurity implements UrlPatternSecurity {
     private final String rootDirectory;
 
     public DirectoryUrlPatternSecurity(String rootDirectory) throws IOException {
-        if (rootDirectory.startsWith(".")) {
+        if (!rootDirectory.startsWith("/")) {
             this.rootDirectory = new File(rootDirectory).getCanonicalPath();
         } else {
             this.rootDirectory = rootDirectory;

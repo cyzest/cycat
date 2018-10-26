@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration>
+
+	<appender name="rolling" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<encoder>
+			<charset>UTF-8</charset>
+			<pattern>[%d] %-5p [%c] %m%n</pattern>
+		</encoder>
+		<File>./logs/app.log</File>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>./logs/app.%d{yyyy-MM-dd}.log</fileNamePattern>
+		</rollingPolicy>
+	</appender>
+
+	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<charset>UTF-8</charset>
+			<pattern>[%d] %-5p [%c] %m%n</pattern>
+		</encoder>
+	</appender>
+
+    <root level="debug">
+		<appender-ref ref="rolling" />
+		<appender-ref ref="console" />
+	</root>
+
+</configuration>

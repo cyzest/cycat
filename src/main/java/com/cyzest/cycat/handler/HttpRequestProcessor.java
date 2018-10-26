@@ -231,7 +231,7 @@ public class HttpRequestProcessor {
                 writer.write("Content-type: " + contentType + CRLF);
             }
 
-            writer.write("Content-length: " + (body != null ? body.length() : 0) + CRLF + CRLF);
+            writer.write("Content-length: " + (body != null ? body.getBytes().length : 0) + CRLF + CRLF);
 
             if (body != null) {
                 writer.write(body);

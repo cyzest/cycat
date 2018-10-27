@@ -86,7 +86,7 @@ public class HttpRequestProcessor {
         HostProcessInfo hostProcessInfo = hostProcessInfoMap.get(host);
 
         if (hostProcessInfo == null) {
-            hostProcessInfo = hostProcessInfoMap.get("localhost");
+            hostProcessInfo = hostProcessInfoMap.get(HostInfo.DEFAULT_HOST);
         }
 
         try {

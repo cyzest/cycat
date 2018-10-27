@@ -83,6 +83,9 @@ public class HttpRequestFactory {
             url = url.substring(0, idx);
         }
 
+        // URL 중복 슬래시 처리
+        url = url.replaceAll("(/)+", "/");
+
         DefaultHttpRequest httpRequest = new DefaultHttpRequest();
 
         httpRequest.setMethod(method);

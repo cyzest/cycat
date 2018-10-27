@@ -4,6 +4,8 @@ import java.util.Map;
 
 public class HostInfo {
 
+    public static final String DEFAULT_HOST = "localhost";
+
     private String host;
     private String root;
     private String index;

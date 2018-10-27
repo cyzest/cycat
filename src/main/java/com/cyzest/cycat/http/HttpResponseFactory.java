@@ -4,7 +4,7 @@ import java.io.*;
 
 public class HttpResponseFactory {
 
-    public static HttpResponse createHttpResponse(OutputStream responseOutputStream) {
+    public static HttpResponse createDefaultHttpResponse(OutputStream responseOutputStream) {
 
         OutputStream outputStream = new DataOutputStream(responseOutputStream);
 

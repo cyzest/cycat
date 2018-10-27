@@ -10,15 +10,28 @@ public class UrlPatternSecurityTest {
 
         String documentRoot = "src";
 
-        DirectoryUrlPatternSecurity directoryUrlPatternSecurity = new DirectoryUrlPatternSecurity(documentRoot);
+        UrlPatternSecurity urlPatternSecurity = new DirectoryUrlPatternSecurity(documentRoot);
 
-        Assert.assertTrue(directoryUrlPatternSecurity.validate("/main/resources/logback.xml"));
-        Assert.assertTrue(directoryUrlPatternSecurity.validate("/main/resources/"));
-        Assert.assertTrue(directoryUrlPatternSecurity.validate("/../src/main/resources/logback.xml"));
+        Assert.assertTrue(urlPatternSecurity.validate("/main/resources/logback.xml"));
+        Assert.assertTrue(urlPatternSecurity.validate("/main/resources/"));
+        Assert.assertTrue(urlPatternSecurity.validate("/../src/main/resources/logback.xml"));
 
-        Assert.assertFalse(directoryUrlPatternSecurity.validate("/main/resources/config"));
-        Assert.assertFalse(directoryUrlPatternSecurity.validate("/main/resources/config.txt"));
-        Assert.assertFalse(directoryUrlPatternSecurity.validate("/../pom.xml"));
+        Assert.assertFalse(urlPatternSecurity.validate("/main/resources/logback"));
+        Assert.assertFalse(urlPatternSecurity.validate("/main/resources/logback.txt"));
+        Assert.assertFalse(urlPatternSecurity.validate("/../pom.xml"));
+    }
+
+    @Test
+    public void fileExtensionUrlPatternSecurityTest() throws Exception {
+
+        UrlPatternSecurity urlPatternSecurity = new FileExtensionUrlPatternSecurity();
+
+        Assert.assertTrue(urlPatternSecurity.validate("/"));
+        Assert.assertTrue(urlPatternSecurity.validate("/test"));
+        Assert.assertTrue(urlPatternSecurity.validate("/test.txt"));
+
+        Assert.assertFalse(urlPatternSecurity.validate("/test.exe"));
+        Assert.assertFalse(urlPatternSecurity.validate("/test.EXE"));
     }
 
 }

@@ -19,10 +19,8 @@ public class UrlPatternSecurityCheckerTest {
 
     @Test
     public void validateTest() {
-
-        Assert.assertFalse(urlPatternSecurityChecker.validate("/../pom.xml"));
         Assert.assertTrue(urlPatternSecurityChecker.validate("/../src/main/resources/logback.xml"));
-
+        Assert.assertFalse(urlPatternSecurityChecker.validate("/../pom.xml"));
     }
 
 }

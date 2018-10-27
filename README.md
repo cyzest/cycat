@@ -15,5 +15,5 @@ Java 8 based Simple Web Application Server
 ```console
 $ mvn clean package
 $ java -jar ./target/cycat-1.0.0.jar
-$ java -jar ./target/cycat-1.0.0.jar --config ./config/config.json
+$ java -jar ./target/cycat-1.0.0.jar --config ./conf/config.json
 ```

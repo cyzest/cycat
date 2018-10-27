@@ -1,5 +1,6 @@
 package com.cyzest.cycat.http;
 
+import com.cyzest.cycat.http.exception.HttpFormatException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +16,7 @@ public class HttpRequestFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpRequestFactory.class);
 
-    public static HttpRequest createHttpRequest(InputStream requestInputStream) throws Exception {
+    public static HttpRequest createDefaultHttpRequest(InputStream requestInputStream) throws Exception {
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(requestInputStream, StandardCharsets.UTF_8));
 

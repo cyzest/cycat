@@ -39,16 +39,15 @@ public class ConnectionHandler implements Runnable {
             }
 
         } catch (IOException ex) {
-            logger.warn("connection io exception", ex);
+            logger.error("connection io exception", ex);
         } finally {
             try {
                 logger.debug("Connected Close IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
                 connection.close();
             } catch (IOException ex) {
-                logger.warn("connection close exception", ex);
+                logger.error("connection close exception", ex);
             }
         }
-
     }
 
 }

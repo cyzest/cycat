@@ -20,7 +20,7 @@ public class CycatServer {
 
     private ServerConfig serverConfig;
 
-    private CycatServer(ServerConfig serverConfig) {
+    public CycatServer(ServerConfig serverConfig) {
         this.serverConfig = serverConfig;
     }
 

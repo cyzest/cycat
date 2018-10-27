@@ -1,4 +1,6 @@
-package com.cyzest.cycat.http;
+package com.cyzest.cycat.http.exception;
+
+import com.cyzest.cycat.http.HttpStatus;
 
 public class HttpStatusException extends Exception {
 

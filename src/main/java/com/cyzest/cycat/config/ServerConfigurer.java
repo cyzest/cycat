@@ -34,7 +34,7 @@ public class ServerConfigurer {
 
         HostInfo host = new HostInfo();
 
-        host.setHost("localhost");
+        host.setHost(HostInfo.DEFAULT_HOST);
         host.setRoot("html");
         host.setIndex("index.html");
 
@@ -46,7 +46,7 @@ public class ServerConfigurer {
         host.setErrorPage(errorPage);
 
         Map<String, String> servletMapping = new HashMap<>();
-        servletMapping.put("/test", "com.cyzest.cycat.service.CurrentTimeServlet");
+        servletMapping.put("/", "com.cyzest.cycat.service.CurrentTimeServlet");
 
         host.setServletMapping(servletMapping);
 
@@ -86,7 +86,7 @@ public class ServerConfigurer {
 
                 List<String> hosts = hostInfos.stream().map(HostInfo::getHost).collect(Collectors.toList());
 
-                if (!hosts.contains("localhost")) {
+                if (!hosts.contains(HostInfo.DEFAULT_HOST)) {
                     hostInfos.add(defaultHostInfo());
                 }
 
@@ -95,7 +95,7 @@ public class ServerConfigurer {
             }
 
         } catch (Exception ex) {
-            logger.error("illegal access configFile", ex);
+            logger.error("illegal access config file", ex);
             throw ex;
         }
 

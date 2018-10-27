@@ -14,4 +14,8 @@ public interface HttpResponse {
 
     Writer getWriter();
 
+    void sendRedirect(String url);
+
+    String getRedirectUrl();
+
 }

@@ -11,5 +11,6 @@ public class HttpConstants {
     public static final String SERVER_HEADER_NAME = "Server";
     public static final String CONTENT_TYPE_HEADER_NAME = "Content-type";
     public static final String CONTENT_LENGTH_HEADER_NAME = "Content-length";
+    public static final String LOCATION_HEADER_NAME = "Location";
 
 }

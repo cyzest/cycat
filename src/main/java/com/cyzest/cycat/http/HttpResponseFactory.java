@@ -25,6 +25,8 @@ public class HttpResponseFactory {
 
         private Writer writer;
 
+        private String redirectUrl;
+
         @Override
         public HttpStatus getHttpStatus() {
             return httpStatus;
@@ -53,6 +55,15 @@ public class HttpResponseFactory {
         public void setWriter(Writer writer) {
             this.writer = writer;
         }
+
+        public void sendRedirect(String url) {
+            this.redirectUrl = url;
+        }
+
+        public String getRedirectUrl() {
+            return redirectUrl;
+        }
+
     }
 
 }

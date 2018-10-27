@@ -108,11 +108,16 @@ public class HttpRequestProcessor {
 
                 servlet.service(httpRequest, httpResponse);
 
-                String body = new String(wrappingOutputStream.toByteArray(), StandardCharsets.UTF_8);
+                String redirectUrl = httpResponse.getRedirectUrl();
 
-                sendResponse(
-                        outputStream, httpRequest.getHttpVersion(),
-                        httpResponse.getHttpStatus(), httpResponse.getContentType(), body);
+                if (redirectUrl != null && !redirectUrl.isEmpty()) {
+                    sendRedirectResponse(outputStream, httpRequest.getHttpVersion(), redirectUrl);
+                } else {
+                    String body = new String(wrappingOutputStream.toByteArray(), StandardCharsets.UTF_8);
+                    sendResponse(
+                            outputStream, httpRequest.getHttpVersion(),
+                            httpResponse.getHttpStatus(), httpResponse.getContentType(), body);
+                }
 
             } else {
 
@@ -220,15 +225,13 @@ public class HttpRequestProcessor {
     }
 
     private void sendResponse(
-            OutputStream outputStream,
-            String httpVersion, HttpStatus httpStatus, String contentType, String body) {
+            OutputStream outputStream, String httpVersion, HttpStatus httpStatus, String contentType, String body) {
 
         try {
 
             Writer writer = new OutputStreamWriter(new BufferedOutputStream(outputStream));
 
             writer.write(httpVersion + " " + httpStatus.getCode() + " " + httpStatus.getMessage() + CRLF);
-
             writer.write(DATE_HEADER_NAME + ": " + new Date() + CRLF);
             writer.write(SERVER_HEADER_NAME + ": Cycat" + CRLF);
 
@@ -243,6 +246,26 @@ public class HttpRequestProcessor {
             if (body != null) {
                 writer.write(body);
             }
+
+            writer.flush();
+
+        } catch (IOException ex) {
+            logger.error("send response io exception", ex);
+        }
+    }
+
+    private void sendRedirectResponse(OutputStream outputStream, String httpVersion, String redirectUrl) {
+
+        try {
+
+            HttpStatus httpStatus = HttpStatus.MOVED_PERMANENTLY;
+
+            Writer writer = new OutputStreamWriter(new BufferedOutputStream(outputStream));
+
+            writer.write(httpVersion + " " + httpStatus.getCode() + " " + httpStatus.getMessage() + CRLF);
+            writer.write(DATE_HEADER_NAME + ": " + new Date() + CRLF);
+            writer.write(SERVER_HEADER_NAME + ": Cycat" + CRLF);
+            writer.write(LOCATION_HEADER_NAME + ": " + redirectUrl + CRLF + CRLF);
 
             writer.flush();
 

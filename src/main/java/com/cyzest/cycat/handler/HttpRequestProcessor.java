@@ -14,9 +14,9 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.cyzest.cycat.http.HttpConstants.*;
 
@@ -24,7 +24,7 @@ public class HttpRequestProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpRequestProcessor.class);
 
-    private final Map<String, HostProcessInfo> hostProcessInfoMap = new HashMap<>();
+    private final Map<String, HostProcessInfo> hostProcessInfoMap = new ConcurrentHashMap<>();
 
     public HttpRequestProcessor(List<HostInfo> hostInfos) throws IOException {
 
@@ -37,7 +37,6 @@ public class HttpRequestProcessor {
             HostProcessInfo hostProcessInfo = new HostProcessInfo(hostInfo);
 
             UrlPatternSecurityChecker urlPatternSecurityChecker = new UrlPatternSecurityChecker();
-
             urlPatternSecurityChecker.addUrlPatternSecurity(new FileExtensionUrlPatternSecurity());
             urlPatternSecurityChecker.addUrlPatternSecurity(new DirectoryUrlPatternSecurity(hostInfo.getRoot()));
 
@@ -113,7 +112,7 @@ public class HttpRequestProcessor {
                 if (redirectUrl != null && !redirectUrl.isEmpty()) {
                     sendRedirectResponse(outputStream, httpRequest.getHttpVersion(), redirectUrl);
                 } else {
-                    String body = new String(wrappingOutputStream.toByteArray(), StandardCharsets.UTF_8);
+                    byte[] body = wrappingOutputStream.toByteArray();
                     sendResponse(
                             outputStream, httpRequest.getHttpVersion(),
                             httpResponse.getHttpStatus(), httpResponse.getContentType(), body);
@@ -148,12 +147,9 @@ public class HttpRequestProcessor {
             OutputStream outputStream,
             HttpRequest httpRequest, HttpResponse httpResponse, HostProcessInfo hostProcessInfo) throws Exception {
 
-        String body;
-
         File htmlFile;
 
         String url = httpRequest.getUrl();
-
         String documentRoot = hostProcessInfo.getRoot();
 
         // 디렉토리 호출은 인덱스 페이지로 접근
@@ -164,7 +160,7 @@ public class HttpRequestProcessor {
             htmlFile = new File(documentRoot + url);
         } else {
             String index = hostProcessInfo.getIndex();
-            htmlFile = new File(documentRoot + "/" + url + "/" + index);
+            htmlFile = new File(documentRoot + url + "/" + index);
         }
 
         // URL 페이지 존재여부 및 보안 규칙 검증
@@ -177,11 +173,10 @@ public class HttpRequestProcessor {
             throw new HttpStatusException(HttpStatus.FORBIDDEN);
         }
 
+        httpResponse.setHttpStatus(HttpStatus.OK);
         httpResponse.setContentType(URLConnection.getFileNameMap().getContentTypeFor(htmlFile.getName()));
 
-        body = new String(Files.readAllBytes(htmlFile.toPath()), StandardCharsets.UTF_8);
-
-        httpResponse.setHttpStatus(HttpStatus.OK);
+        byte[] body = Files.readAllBytes(htmlFile.toPath());
 
         sendResponse(
                 outputStream, httpRequest.getHttpVersion(),
@@ -193,7 +188,7 @@ public class HttpRequestProcessor {
             HttpStatus httpStatus, OutputStream outputStream,
             HttpRequest httpRequest, HttpResponse httpResponse, HostProcessInfo hostProcessInfo) {
 
-        String body = null;
+        byte[] body = null;
 
         httpResponse.setHttpStatus(httpStatus);
 
@@ -210,7 +205,7 @@ public class HttpRequestProcessor {
                 if (htmlFile.isFile() && htmlFile.canRead()) {
                     try {
                         httpResponse.setContentType(URLConnection.getFileNameMap().getContentTypeFor(errorPage));
-                        body = new String(Files.readAllBytes(htmlFile.toPath()), StandardCharsets.UTF_8);
+                        body = Files.readAllBytes(htmlFile.toPath());
                     } catch (IOException ex) {
                         logger.warn("htmlFile readAllBytes io exception", ex);
                     }
@@ -225,7 +220,7 @@ public class HttpRequestProcessor {
     }
 
     private void sendResponse(
-            OutputStream outputStream, String httpVersion, HttpStatus httpStatus, String contentType, String body) {
+            OutputStream outputStream, String httpVersion, HttpStatus httpStatus, String contentType, byte[] body) {
 
         try {
 
@@ -239,12 +234,12 @@ public class HttpRequestProcessor {
                 writer.write(CONTENT_TYPE_HEADER_NAME + ": " + contentType + CRLF);
             }
 
-            int contentLength = body != null ? body.getBytes().length : 0;
+            int contentLength = body != null ? body.length : 0;
 
             writer.write(CONTENT_LENGTH_HEADER_NAME + ": " + contentLength + CRLF + CRLF);
 
             if (body != null) {
-                writer.write(body);
+                writer.write(new String(body, StandardCharsets.UTF_8));
             }
 
             writer.flush();

@@ -111,7 +111,7 @@ public class HttpRequestFactory {
         public String getHost() {
             String host = null;
             if (headerMap != null) {
-                host = headerMap.get("Host");
+                host = headerMap.get(HttpConstants.HOST_HEADER_NAME);
                 if (host != null && !host.isEmpty()) {
                     host = host.split(":")[0];
                 }

@@ -16,7 +16,9 @@ public class CurrentTimeServlet implements SimpleServlet {
 
         Writer writer = httpResponse.getWriter();
 
-        writer.write("현재시각 : " + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
+        String currentTime = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+
+        writer.write("Current Time : " + currentTime);
 
         writer.flush();
     }

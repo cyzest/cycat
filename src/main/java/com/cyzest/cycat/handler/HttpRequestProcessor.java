@@ -258,7 +258,7 @@ public class HttpRequestProcessor {
 
         try {
 
-            HttpStatus httpStatus = HttpStatus.MOVED_PERMANENTLY;
+            HttpStatus httpStatus = HttpStatus.TEMPORARY_REDIRECT;
 
             Writer writer = new OutputStreamWriter(new BufferedOutputStream(outputStream));
 

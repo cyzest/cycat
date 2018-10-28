@@ -3,7 +3,7 @@ package com.cyzest.cycat.http;
 public enum HttpStatus {
 
     OK(200, "OK"),
-    MOVED_PERMANENTLY(301, "Moved Permanently"),
+    TEMPORARY_REDIRECT(307, "Temporary Redirect"),
     BAD_REQUEST(400, "Bad Request"),
     UNAUTHORIZED(401, "Unauthorized"),
     FORBIDDEN(403, "Forbidden"),

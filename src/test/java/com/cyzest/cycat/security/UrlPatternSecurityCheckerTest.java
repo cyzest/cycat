@@ -1,8 +1,8 @@
 package com.cyzest.cycat.security;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
@@ -10,7 +10,7 @@ public class UrlPatternSecurityCheckerTest {
 
     private UrlPatternSecurityChecker urlPatternSecurityChecker;
 
-    @Before
+    @BeforeEach
     public void init() throws IOException {
         this.urlPatternSecurityChecker = new UrlPatternSecurityChecker();
         this.urlPatternSecurityChecker.addUrlPatternSecurity(new DirectoryUrlPatternSecurity("src"));
@@ -19,8 +19,8 @@ public class UrlPatternSecurityCheckerTest {
 
     @Test
     public void validateTest() {
-        Assert.assertTrue(urlPatternSecurityChecker.validate("/../src/main/resources/logback.xml"));
-        Assert.assertFalse(urlPatternSecurityChecker.validate("/../pom.xml"));
+        Assertions.assertTrue(urlPatternSecurityChecker.validate("/../src/main/resources/logback.xml"));
+        Assertions.assertFalse(urlPatternSecurityChecker.validate("/../pom.xml"));
     }
 
 }

@@ -28,12 +28,14 @@ public class UrlPatternSecurityChecker {
 
         boolean isValid = true;
 
-        if (!urlPatternSecurityList.isEmpty()) {
-            for (UrlPatternSecurity urlPatternSecurity : urlPatternSecurityList) {
-                if (!urlPatternSecurity.validate(url)) {
-                    isValid = false;
-                    break;
-                }
+        if (urlPatternSecurityList.isEmpty()) {
+            return isValid;
+        }
+
+        for (UrlPatternSecurity urlPatternSecurity : urlPatternSecurityList) {
+            if (!urlPatternSecurity.validate(url)) {
+                isValid = false;
+                break;
             }
         }
 

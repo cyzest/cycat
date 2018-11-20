@@ -1,7 +1,7 @@
 package com.cyzest.cycat.config;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.List;
@@ -15,24 +15,24 @@ public class ServerConfigurerTest {
 
         ServerConfig serverConfig = ServerConfigurer.createServerConfig(confFile);
 
-        Assert.assertNotNull(serverConfig);
-        Assert.assertEquals(serverConfig.getPort(), Integer.valueOf(8080));
-        Assert.assertEquals(serverConfig.getThread(), Integer.valueOf(10));
+        Assertions.assertNotNull(serverConfig);
+        Assertions.assertEquals(Integer.valueOf(8080), serverConfig.getPort());
+        Assertions.assertEquals(Integer.valueOf(10), serverConfig.getThread());
 
         List<HostInfo> hostInfos = serverConfig.getHosts();
 
-        Assert.assertNotNull(hostInfos);
-        Assert.assertEquals(hostInfos.size(), 2);
+        Assertions.assertNotNull(hostInfos);
+        Assertions.assertEquals(2, hostInfos.size());
 
         HostInfo hostInfo = hostInfos.get(0);
 
-        Assert.assertNotNull(hostInfo);
-        Assert.assertEquals(hostInfo.getHost(), "cyzest.com");
+        Assertions.assertNotNull(hostInfo);
+        Assertions.assertEquals("cyzest.com", hostInfo.getHost());
 
         HostInfo defaultHostInfo = hostInfos.get(1);
 
-        Assert.assertNotNull(defaultHostInfo);
-        Assert.assertEquals(defaultHostInfo.getHost(), HostInfo.DEFAULT_HOST);
+        Assertions.assertNotNull(defaultHostInfo);
+        Assertions.assertEquals(HostInfo.DEFAULT_HOST, defaultHostInfo.getHost());
     }
 
 }

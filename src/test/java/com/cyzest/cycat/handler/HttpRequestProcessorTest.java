@@ -5,9 +5,9 @@ import com.cyzest.cycat.config.ServerConfig;
 import com.cyzest.cycat.config.ServerConfigurer;
 import com.cyzest.cycat.http.HttpStatus;
 import com.cyzest.cycat.http.exception.HttpFormatException;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +22,7 @@ public class HttpRequestProcessorTest {
 
     private HttpRequestProcessor defaultHttpRequestProcessor;
 
-    @Before
+    @BeforeEach
     public void init() throws IOException {
         ServerConfig serverConfig = ServerConfigurer.createDefaultServerConfig();
         defaultHttpRequestProcessor = new HttpRequestProcessor(serverConfig.getHosts());
@@ -35,11 +35,11 @@ public class HttpRequestProcessorTest {
 
         ResponseMessage rootResponseMessage = processRequest(rootRequestMessage, defaultHttpRequestProcessor);
 
-        Assert.assertNotNull(rootResponseMessage);
-        Assert.assertEquals(rootResponseMessage.getVersion(), "HTTP/1.1");
-        Assert.assertEquals(rootResponseMessage.getStatusCode(), HttpStatus.OK.getCode());
-        Assert.assertEquals(rootResponseMessage.getStatusMessage(), HttpStatus.OK.getMessage());
-        Assert.assertNotNull(rootResponseMessage.getBody());
+        Assertions.assertNotNull(rootResponseMessage);
+        Assertions.assertEquals("HTTP/1.1", rootResponseMessage.getVersion());
+        Assertions.assertEquals(HttpStatus.OK.getCode(), rootResponseMessage.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK.getMessage(), rootResponseMessage.getStatusMessage());
+        Assertions.assertNotNull(rootResponseMessage.getBody());
     }
 
     @Test
@@ -49,11 +49,11 @@ public class HttpRequestProcessorTest {
 
         ResponseMessage indexResponseMessage = processRequest(indexRequestMessage, defaultHttpRequestProcessor);
 
-        Assert.assertNotNull(indexResponseMessage);
-        Assert.assertEquals(indexResponseMessage.getVersion(), "HTTP/1.1");
-        Assert.assertEquals(indexResponseMessage.getStatusCode(), HttpStatus.OK.getCode());
-        Assert.assertEquals(indexResponseMessage.getStatusMessage(), HttpStatus.OK.getMessage());
-        Assert.assertNotNull(indexResponseMessage.getBody());
+        Assertions.assertNotNull(indexResponseMessage);
+        Assertions.assertEquals("HTTP/1.1", indexResponseMessage.getVersion());
+        Assertions.assertEquals(HttpStatus.OK.getCode(), indexResponseMessage.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK.getMessage(), indexResponseMessage.getStatusMessage());
+        Assertions.assertNotNull(indexResponseMessage.getBody());
     }
 
     @Test
@@ -70,13 +70,13 @@ public class HttpRequestProcessorTest {
         ResponseMessage bDotComMessage =
                 processRequest(createRequestMessage(GET, "/", "b.com:8080"), httpRequestProcessor);
 
-        Assert.assertNotNull(aDotComMessage);
-        Assert.assertNotNull(aDotComMessage.getBody());
+        Assertions.assertNotNull(aDotComMessage);
+        Assertions.assertNotNull(aDotComMessage.getBody());
 
-        Assert.assertNotNull(bDotComMessage);
-        Assert.assertNotNull(bDotComMessage.getBody());
+        Assertions.assertNotNull(bDotComMessage);
+        Assertions.assertNotNull(bDotComMessage.getBody());
 
-        Assert.assertNotEquals(aDotComMessage.getBody(), bDotComMessage.getBody());
+        Assertions.assertNotEquals(aDotComMessage.getBody(), bDotComMessage.getBody());
     }
 
     @Test
@@ -86,9 +86,9 @@ public class HttpRequestProcessorTest {
 
         ResponseMessage responseMessage = processRequest(requestMessage, defaultHttpRequestProcessor);
 
-        Assert.assertNotNull(responseMessage);
-        Assert.assertEquals(responseMessage.getStatusCode(), HttpStatus.NOT_FOUND.getCode());
-        Assert.assertNotNull(responseMessage.getBody());
+        Assertions.assertNotNull(responseMessage);
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.getCode(), responseMessage.getStatusCode());
+        Assertions.assertNotNull(responseMessage.getBody());
     }
 
     @Test
@@ -98,9 +98,9 @@ public class HttpRequestProcessorTest {
 
         ResponseMessage responseMessage = processRequest(requestMessage, defaultHttpRequestProcessor);
 
-        Assert.assertNotNull(responseMessage);
-        Assert.assertEquals(responseMessage.getStatusCode(), HttpStatus.FORBIDDEN.getCode());
-        Assert.assertNotNull(responseMessage.getBody());
+        Assertions.assertNotNull(responseMessage);
+        Assertions.assertEquals(HttpStatus.FORBIDDEN.getCode(), responseMessage.getStatusCode());
+        Assertions.assertNotNull(responseMessage.getBody());
     }
 
     @Test
@@ -110,9 +110,9 @@ public class HttpRequestProcessorTest {
 
         ResponseMessage responseMessage = processRequest(requestMessage, defaultHttpRequestProcessor);
 
-        Assert.assertNotNull(responseMessage);
-        Assert.assertEquals(responseMessage.getStatusCode(), HttpStatus.FORBIDDEN.getCode());
-        Assert.assertNotNull(responseMessage.getBody());
+        Assertions.assertNotNull(responseMessage);
+        Assertions.assertEquals(HttpStatus.FORBIDDEN.getCode(), responseMessage.getStatusCode());
+        Assertions.assertNotNull(responseMessage.getBody());
     }
 
     @Test
@@ -126,9 +126,9 @@ public class HttpRequestProcessorTest {
 
         ResponseMessage responseMessage = processRequest(requestMessage, httpRequestProcessor);
 
-        Assert.assertNotNull(responseMessage);
-        Assert.assertEquals(responseMessage.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR.getCode());
-        Assert.assertNotNull(responseMessage.getBody());
+        Assertions.assertNotNull(responseMessage);
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.getCode(), responseMessage.getStatusCode());
+        Assertions.assertNotNull(responseMessage.getBody());
     }
 
     private ResponseMessage processRequest(

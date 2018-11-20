@@ -1,7 +1,7 @@
 package com.cyzest.cycat.security;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class UrlPatternSecurityTest {
 
@@ -12,26 +12,26 @@ public class UrlPatternSecurityTest {
 
         UrlPatternSecurity urlPatternSecurity = new DirectoryUrlPatternSecurity(documentRoot);
 
-        Assert.assertTrue(urlPatternSecurity.validate("/main/resources/logback.xml"));
-        Assert.assertTrue(urlPatternSecurity.validate("/main/resources/"));
-        Assert.assertTrue(urlPatternSecurity.validate("/../src/main/resources/logback.xml"));
+        Assertions.assertTrue(urlPatternSecurity.validate("/main/resources/logback.xml"));
+        Assertions.assertTrue(urlPatternSecurity.validate("/main/resources/"));
+        Assertions.assertTrue(urlPatternSecurity.validate("/../src/main/resources/logback.xml"));
 
-        Assert.assertFalse(urlPatternSecurity.validate("/main/resources/logback"));
-        Assert.assertFalse(urlPatternSecurity.validate("/main/resources/logback.txt"));
-        Assert.assertFalse(urlPatternSecurity.validate("/../pom.xml"));
+        Assertions.assertFalse(urlPatternSecurity.validate("/main/resources/logback"));
+        Assertions.assertFalse(urlPatternSecurity.validate("/main/resources/logback.txt"));
+        Assertions.assertFalse(urlPatternSecurity.validate("/../pom.xml"));
     }
 
     @Test
-    public void fileExtensionUrlPatternSecurityTest() throws Exception {
+    public void fileExtensionUrlPatternSecurityTest() {
 
         UrlPatternSecurity urlPatternSecurity = new FileExtensionUrlPatternSecurity();
 
-        Assert.assertTrue(urlPatternSecurity.validate("/"));
-        Assert.assertTrue(urlPatternSecurity.validate("/test"));
-        Assert.assertTrue(urlPatternSecurity.validate("/test.txt"));
+        Assertions.assertTrue(urlPatternSecurity.validate("/"));
+        Assertions.assertTrue(urlPatternSecurity.validate("/test"));
+        Assertions.assertTrue(urlPatternSecurity.validate("/test.txt"));
 
-        Assert.assertFalse(urlPatternSecurity.validate("/test.exe"));
-        Assert.assertFalse(urlPatternSecurity.validate("/test.EXE"));
+        Assertions.assertFalse(urlPatternSecurity.validate("/test.exe"));
+        Assertions.assertFalse(urlPatternSecurity.validate("/test.EXE"));
     }
 
 }

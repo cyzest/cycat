@@ -147,14 +147,14 @@ public class HttpRequestProcessor {
             OutputStream outputStream,
             HttpRequest httpRequest, HttpResponse httpResponse, HostProcessInfo hostProcessInfo) throws Exception {
 
-        File htmlFile;
+        // 디렉토리 호출은 인덱스 페이지로 접근
+
+        String fileExtensionRegx = "^(.)+\\.(\\w)+$";
 
         String url = httpRequest.getUrl();
         String documentRoot = hostProcessInfo.getRoot();
 
-        // 디렉토리 호출은 인덱스 페이지로 접근
-
-        String fileExtensionRegx = "^(.)+\\.(\\w)+$";
+        File htmlFile;
 
         if (url.matches(fileExtensionRegx)) {
             htmlFile = new File(documentRoot + url);
@@ -190,8 +190,6 @@ public class HttpRequestProcessor {
 
         byte[] body = null;
 
-        httpResponse.setHttpStatus(httpStatus);
-
         Map<String, String> errorPageMap = hostProcessInfo.getErrorPage();
 
         if (errorPageMap != null && !errorPageMap.isEmpty()) {
@@ -212,6 +210,8 @@ public class HttpRequestProcessor {
                 }
             }
         }
+
+        httpResponse.setHttpStatus(httpStatus);
 
         sendResponse(
                 outputStream, httpRequest.getHttpVersion(),

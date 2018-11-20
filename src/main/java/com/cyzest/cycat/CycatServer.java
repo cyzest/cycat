@@ -32,7 +32,7 @@ public class CycatServer {
 
             HttpRequestProcessor httpRequestProcessor = new HttpRequestProcessor(serverConfig.getHosts());
 
-            logger.info("Accepting connections on port " + server.getLocalPort());
+            logger.info("connections on port " + server.getLocalPort());
 
             while (true) {
 
@@ -45,7 +45,7 @@ public class CycatServer {
                     executor.submit(connectionHandler);
 
                 } catch (IOException ex) {
-                    logger.warn("Error accepting connection", ex);
+                    logger.warn("Error connection", ex);
                 }
             }
 

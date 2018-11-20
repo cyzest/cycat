@@ -1,7 +1,9 @@
 # cycat
-Java 8 based Simple Web Application Server
 
-### 목적
+[![Build Status](https://travis-ci.org/cyzest/cycat.svg?branch=master)](https://travis-ci.org/cyzest/cycat)
+[![Code Coverage](https://codecov.io/gh/cyzest/cycat/branch/master/graph/badge.svg)](https://codecov.io/gh/cyzest/cycat)
+
+### Java 8 based Simple Web Application Server
 * HTTP 기반 통신을 주고받기 위한 웹서버의 구조 이해
 * Java 기반 서블릿 컨테이너의 구조 이해
 
